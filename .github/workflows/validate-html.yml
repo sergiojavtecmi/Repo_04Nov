@@ -40,10 +40,11 @@ jobs:
         run: |
           cp index.html optimized_index.html  # Simulación de optimización
           echo "Archivo optimizado creado como optimized_index.html"
-
+  
   deploy:
     runs-on: ubuntu-latest
-    needs: validate  # Esto garantiza que el despliegue se realice después de las validaciones, pero ambas tareas están en la misma rama.
+    needs: validate
+    if: success()
 
     steps:
       - name: Check out code
