@@ -1,19 +1,23 @@
-name: Validate and Deploy HTML
+name: Validate and Deploy HTML on gh-pages
 
 on:
   push:
     branches:
-      - main
+      - main  # El flujo de trabajo se ejecutará cuando haya un push a la rama 'main'
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
+  validate_and_deploy:
+    runs-on: ubuntu-latest  # Usamos Ubuntu para ejecutar los jobs
 
     steps:
-      - name: Check out code
+      # 1. Checkout de la rama gh-pages (trabajamos directamente en la rama gh-pages)
+      - name: Checkout gh-pages branch
         uses: actions/checkout@v2
+        with:
+          ref: gh-pages  # Aquí estamos haciendo checkout de la rama 'gh-pages'
 
-      - name: Validate HTML
+      # 2. Validar el HTML en la rama gh-pages
+      - name: Validate HTML on gh-pages
         run: |
           if [ ! -f index.html ]; then
             echo "index.html no encontrado!"
@@ -36,21 +40,20 @@ jobs:
 
           echo "Validaciones de HTML completadas con éxito!"
 
-      - name: Create optimized HTML
+      # 3. Crear el archivo optimizado en la rama gh-pages
+      - name: Create optimized HTML in gh-pages
         run: |
           cp index.html optimized_index.html  # Simulación de optimización
           echo "Archivo optimizado creado como optimized_index.html"
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: validate  # Esto garantiza que el despliegue se realice después de las validaciones, pero ambas tareas están en la misma rama.
+      # 4. Configuración para hacer commit y push a gh-pages
+      - name: Commit and push changes to gh-pages
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
 
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          git add -A
+          git commit -m "Optimized HTML files deployed to gh-pages"
+          git push origin gh-pages  # Push de los archivos optimizados a la rama gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Necesario para hacer el push a gh-pages
